@@ -1,0 +1,27 @@
+{
+  "name": "html-to-pdf",
+  "version": "1.0.0",
+  "description": "This package will help you to create PDF using HTML code as tamplate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shivam20yadav/html-to-pdf.git"
+  },
+  "keywords": [
+    "pdf",
+    "html",
+    "genrate"
+  ],
+  "author": "Shivam Yadav",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shivam20yadav/html-to-pdf/issues"
+  },
+  "homepage": "https://github.com/shivam20yadav/html-to-pdf#readme",
+  "dependencies": {
+    "puppeteer": "^19.3.0"
+  }
+}

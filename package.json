@@ -1,6 +1,6 @@
 {
-  "name": "html-to-pdf",
-  "version": "1.0.0",
+  "name": "converter-html-to-pdf",
+  "version": "1.0.1",
   "description": "This package will help you to create PDF using HTML code as tamplate",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,12 @@
   "keywords": [
     "pdf",
     "html",
-    "genrate"
+    "generate",
+    "convert",
+    "html-pdf",
+    "convert html to pdf",
+    "html to pdf",
+    "HTML to PDF"
   ],
   "author": "Shivam Yadav",
   "license": "ISC",

@@ -27,7 +27,7 @@ async function Gen(){
             bottom: 100 // set margin at bottom for footer
         }
     }
-    fs.writeFileSync("temp.pdf",await pdfGen(HTML,option));
+    fs.writeFileSync("temp.pdf",await pdfGen.generatePdf(HTML,option));
 }
 Gen()
 

@@ -1,64 +1,104 @@
-# html-to-pdf
+# converter-html-to-pdf
 
-## Package Description
+Convert an HTML string to a PDF using headless Chromium (via [Puppeteer](https://pptr.dev/)).
+Works with any template engine (EJS, Handlebars, ...) that returns an HTML string.
 
-This package can be use for convert HTML code to PDF.
+Requires Node.js >= 22.12. Installing downloads Chromium (~170 MB).
 
-#
-
-## How to use
+## Install
 
 ```
-const pdfGen = require('html-to-pdf');
-const fs = require('fs);
-async function Gen(){
-    let HTML = `
+npm install converter-html-to-pdf
+```
+
+## Usage
+
+```js
+const fs = require('fs');
+const pdfGen = require('converter-html-to-pdf');
+
+async function main() {
+    const html = `
         <html>
             <body>
                 <h3>Hello world</h3>
             </body>
-        <html>
+        </html>`;
 
-    let option = {
-        format: 'A4', // page size
-        displayHeaderFooter: true,
-        margin: {
-            top: 100, //set margin at top for header
-            bottom: 100 // set margin at bottom for footer
-        }
-    }
-    fs.writeFileSync("temp.pdf",await pdfGen.generatePdf(HTML,option));
+    const pdf = await pdfGen.generatePdf(html); // Buffer
+    fs.writeFileSync('temp.pdf', pdf);
 }
-Gen()
 
-`
-
+main();
 ```
 
-This is a sample code for create PDF using html. We can use ejs or any tamplate that return as string html for dynamically create PDF using html code.
+`new pdfGen().generatePdf(...)` (the v1 style) still works too.
 
-Here I used very basic option for creating pdf and if you dont provide any option it will use inbuilt option but if you want to to add any option I will drop a link for all option avalible for lib.
+## API
 
-| Property             | Modifiers       | Type                                                                                                                                                                                                                                                                            | Description                                                        | Default |
-|----------------------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|---------|
-| displayHeaderFooter? | boolean         | (Optional) Whether to show the header and footer.                                                                                                                                                                                                                               | false                                                              |
-| footerTemplate?      | string          | (Optional) HTML template for the print footer. Has the same constraints and support for special classes as PDFOptions.headerTemplate.                                                                                                                                           |
-| format?              | PaperFormat     | (Optional)                                                                                                                                                                                                                                                                      | letter.                                                            |
-| headerTemplate?      | string          | (Optional) HTML template for the print header. Should be valid HTML with the following classes used to inject values into them:- date formatted print date- title document title- url document location- pageNumber current page number- totalPages total pages in the document |
-| height?              | string | number | (Optional) Sets the height of paper. You can pass in a number or a string with a unit.                                                                                                                                                                                          |
-| landscape?           | boolean         | (Optional) Whether to print in landscape orientation.                                                                                                                                                                                                                           | = false                                                            |
-| margin?              | PDFMargin       | (Optional) Set the PDF margins.                                                                                                                                                                                                                                                 | no margins are set.                                                |
-| omitBackground?      | boolean         | (Optional) Hides default white background and allows generating pdfs with transparency.                                                                                                                                                                                         | false                                                              |
-| pageRanges?          | string          | (Optional) Paper ranges to print, e.g. 1-5, 8, 11-13.                                                                                                                                                                                                                           | The empty string, which means all pages are printed.               |
-| path?                | string          | (Optional) The path to save the file to.                                                                                                                                                                                                                                        | the empty string, which means the PDF will not be written to disk. |
-| preferCSSPageSize?   | boolean         | (Optional) Give any CSS @page size declared in the page priority over what is declared in the width or height or format option.                                                                                                                                                 | false, which will scale the content to fit the paper size.         |
-| printBackground?     | boolean         | (Optional) Set to true to print background graphics.                                                                                                                                                                                                                            | false                                                              |
-| scale?               | number          | (Optional) Scales the rendering of the web page. Amount must be between 0.1 and 2.                                                                                                                                                                                              | 1                                                                  |
-| timeout?             | number          | (Optional) Timeout in milliseconds                                                                                                                                                                                                                                              | 30000                                                              |
-| width?               | string | number | (Optional) Sets the width of paper. You can pass in a number or a string with a unit.                                                                                                                                                                                           |
+```
+generatePdf(html, options?, extra?) => Promise<Buffer>
+```
 
+### `options`
 
+Any [Puppeteer PDF option](https://pptr.dev/api/puppeteer.pdfoptions). They are merged over these defaults:
 
-https://pptr.dev/api/puppeteer.pdfoptions/
+```js
+{
+    format: 'A4',
+    printBackground: true,
+    margin: { top: 20, bottom: 20, left: 20, right: 20 }
+}
+```
 
-Please check this link for more option 
+Commonly used: `format`, `landscape`, `margin`, `printBackground`, `displayHeaderFooter` (with `headerTemplate` / `footerTemplate`), `pageRanges`, `scale`, `width`, `height`, `preferCSSPageSize`, `timeout`.
+
+```js
+await pdfGen.generatePdf(html, {
+    format: 'A4',
+    displayHeaderFooter: true,
+    headerTemplate: '<div style="font-size:10px">My header</div>',
+    footerTemplate: '<div style="font-size:10px">Page <span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+    margin: { top: 100, bottom: 100 }
+});
+```
+
+### `extra`
+
+| Property        | Description                                                                              |
+|-----------------|------------------------------------------------------------------------------------------|
+| `browser`       | Reuse a running Puppeteer browser (much faster for many PDFs). You must close it yourself. |
+| `launchOptions` | Extra options for `puppeteer.launch`. Default `args` are `--no-sandbox --disable-setuid-sandbox`; pass your own `args` to replace them. |
+| `javaScript`    | Set `false` to disable JavaScript while rendering (recommended for untrusted HTML).      |
+
+Reusing a browser:
+
+```js
+const puppeteer = require('puppeteer');
+const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+const pdf = await pdfGen.generatePdf(html, {}, { browser });
+await browser.close();
+```
+
+## Docker / Linux
+
+Chromium usually refuses to start as root without `--no-sandbox`, so it is on by default. If you run as a non-root user with a working sandbox, pass `launchOptions: { args: [] }` for a safer setup. You will also need Chromium's system libraries (see the [Puppeteer troubleshooting guide](https://pptr.dev/troubleshooting)).
+
+## Security
+
+The HTML is rendered by a real browser. If it comes from untrusted users, set `javaScript: false` and be aware it can still request remote URLs (images, iframes, CSS).
+
+## Changes in 2.0.0
+
+- Fixed: launch flags were never applied (`options` instead of `args`).
+- Fixed: the browser was leaked when rendering failed.
+- Removed `--disable-web-security`.
+- Options are merged over the defaults instead of replacing them.
+- `printBackground` is now on by default, header/footer is off by default.
+- Waits for network to be idle before printing.
+- Updated Puppeteer 19 -> 25 (needs Node >= 22.12). Added TypeScript typings.
+
+## License
+
+ISC

@@ -1,10 +1,18 @@
 {
   "name": "converter-html-to-pdf",
-  "version": "1.0.1",
-  "description": "This package will help you to create PDF using HTML code as tamplate",
+  "version": "2.0.0",
+  "description": "Create PDFs from an HTML string (works with any template engine) using headless Chromium",
   "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
@@ -16,9 +24,8 @@
     "generate",
     "convert",
     "html-pdf",
-    "convert html to pdf",
     "html to pdf",
-    "HTML to PDF"
+    "puppeteer"
   ],
   "author": "Shivam Yadav",
   "license": "ISC",
@@ -27,6 +34,6 @@
   },
   "homepage": "https://github.com/shivam20yadav/html-to-pdf#readme",
   "dependencies": {
-    "puppeteer": "^19.3.0"
+    "puppeteer": "^25.15.0"
   }
 }
